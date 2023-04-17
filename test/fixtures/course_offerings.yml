@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  instructor: MyString
+  date: 2023-04-13 18:56:02
+  min_employees: MyString
+  max_employees: MyString
+
+two:
+  name: MyString
+  instructor: MyString
+  date: 2023-04-13 18:56:02
+  min_employees: MyString
+  max_employees: MyString
