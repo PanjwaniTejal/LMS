@@ -1,15 +1,25 @@
 class CourseOffering < ApplicationRecord
   has_many :registrations
   validates :name, :instructor, :date, :min_employees, :max_employees, presence: true
-  validate :course_offering_id_validation
+  validate :course_offering_id_validation, on: :create
 
   before_create :generate_course_offering_id
+
+  # Allot course-offering
+  def allot
+    self.status = 'CONFIRMED'
+    self.save
+  end
+
+  def active_registrations
+    registrations.where(status: 'ACCEPTED')
+  end
 
   private
 
   # Validation for course_offering_id should be uniq
   def course_offering_id_validation
-    coid = "OFFERING-#{name.upcase}-#{instructor.upcase}"
+    coid = "OFFERING-#{name&.upcase}-#{instructor&.upcase}"
     if CourseOffering.find_by(course_offering_id: coid).present?
       self.errors[:base] << "Combination of name and instructor should be uniq"
     end

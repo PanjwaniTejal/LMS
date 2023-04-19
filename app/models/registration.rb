@@ -10,7 +10,7 @@ class Registration < ApplicationRecord
 
   # Cancel registation
   def cancel_course_registration
-    self.status = if self.course_offering.status == 'COURSE_FULL_ERROR'
+    self.status = if self.course_offering.status == 'CONFIRMED'
                     'CANCEL_REJECTED'
                   else
                     'CANCEL_ACCEPTED'
@@ -23,7 +23,7 @@ class Registration < ApplicationRecord
 
   # Validation for registration_id should be uniq
   def registration_id_validation
-    rid = "REG-COURSE-#{employee_name.upcase}-#{course_offering.name.upcase}"
+    rid = "REG-COURSE-#{employee_name&.upcase}-#{course_offering&.name&.upcase}"
     if Registration.find_by(registration_id: rid).present?
       self.errors[:base] << "Combination of employee_name and course_offering name should be uniq"
     end
@@ -31,28 +31,25 @@ class Registration < ApplicationRecord
 
   # Generate registration_id
   def generate_registration_id
-    self.registration_id = "REG-COURSE-#{employee_name.upcase}-#{course_offering.name.upcase}"
+    self.registration_id = "REG-COURSE-#{employee_name&.upcase}-#{course_offering.name.upcase}"
   end
 
   # Get employee name form email id
   def employee_name
-    employee_email.split('@').first
+    employee_email&.split('@')&.first
   end
 
 
   # course_offerings status change
-  def add_status
-    self
-      .course_offering
-      .status = if course_offering.registrations.count > course_offering.max_employees
+  def add_status    
+    self.status = if course_offering.registrations.count > course_offering.max_employees
                     'COURSE_FULL_ERROR'
-                  elsif course_offering.date > Date.today || course_offering.registrations.count < course_offering.min_employees
+                  elsif((course_offering.date < Date.today) && (course_offering.registrations.count < course_offering.min_employees))
                    'COURSE_CANCELED'
                   else
                     'ACCEPTED'
                   end
 
-    self.course_offering.save
   end
  
 
